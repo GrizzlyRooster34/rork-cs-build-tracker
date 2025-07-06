@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LightingPlan, ModificationStatus } from '@/types';
+import { LightingPlan } from '@/types';
+import type { ModificationStatus } from '@/types';
 
 interface LightingState {
   plans: LightingPlan[];

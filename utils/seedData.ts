@@ -37,7 +37,8 @@ export const hasExistingData = () => {
   const audioComponents = useAudioStore.getState().components || [];
   const crashEntries = useCrashStore.getState().entries || [];
   const blueprints = useBlueprintStore.getState().blueprints || [];
-  const dimensions = useBlueprintStore.getState().dimensions || [];
+  const blueprintStore = useBlueprintStore.getState();
+  const dimensions = blueprintStore.dimensions || [];
   const lightingPlans = useLightingStore.getState().plans || [];
   
   return (

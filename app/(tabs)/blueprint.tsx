@@ -32,13 +32,14 @@ export default function BlueprintScreen() {
     }
   };
 
-  const groupedDimensions = (dimensions || []).reduce((acc, dimension) => {
+  const safeDimensions = dimensions || [];
+  const groupedDimensions = safeDimensions.reduce((acc, dimension) => {
     if (!acc[dimension.category]) {
       acc[dimension.category] = [];
     }
     acc[dimension.category].push(dimension);
     return acc;
-  }, {} as Record<string, typeof dimensions>);
+  }, {} as Record<string, typeof safeDimensions>);
 
   const getCategoryTitle = (category: string) => {
     switch (category) {
