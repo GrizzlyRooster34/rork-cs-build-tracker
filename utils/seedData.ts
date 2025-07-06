@@ -14,32 +14,70 @@ import { useLightingStore } from '@/store/lightingStore';
  */
 export const initializeSeedData = () => {
   // Initialize all stores with seed data
-  useMaintenanceStore.getState().initializeWithSeedData();
-  useModificationsStore.getState().initializeWithSeedData();
-  useDiagnosticsStore.getState().initializeWithSeedData();
-  useFuelStore.getState().initializeWithSeedData();
-  useGalleryStore.getState().initializeWithSeedData();
-  useAudioStore.getState().initializeWithSeedData();
-  useCrashStore.getState().initializeWithSeedData();
-  useBlueprintStore.getState().initializeWithSeedData();
-  useLightingStore.getState().initializeData();
+  const maintenanceStore = useMaintenanceStore.getState();
+  const modificationsStore = useModificationsStore.getState();
+  const diagnosticsStore = useDiagnosticsStore.getState();
+  const fuelStore = useFuelStore.getState();
+  const galleryStore = useGalleryStore.getState();
+  const audioStore = useAudioStore.getState();
+  const crashStore = useCrashStore.getState();
+  const blueprintStore = useBlueprintStore.getState();
+  const lightingStore = useLightingStore.getState();
+
+  // Only initialize if the methods exist
+  if (maintenanceStore.initializeWithSeedData) {
+    maintenanceStore.initializeWithSeedData();
+  }
+  if (modificationsStore.initializeWithSeedData) {
+    modificationsStore.initializeWithSeedData();
+  }
+  if (diagnosticsStore.initializeWithSeedData) {
+    diagnosticsStore.initializeWithSeedData();
+  }
+  if (fuelStore.initializeWithSeedData) {
+    fuelStore.initializeWithSeedData();
+  }
+  if (galleryStore.initializeWithSeedData) {
+    galleryStore.initializeWithSeedData();
+  }
+  if (audioStore.initializeWithSeedData) {
+    audioStore.initializeWithSeedData();
+  }
+  if (crashStore.initializeWithSeedData) {
+    crashStore.initializeWithSeedData();
+  }
+  if (blueprintStore.initializeWithSeedData) {
+    blueprintStore.initializeWithSeedData();
+  }
+  if (lightingStore.initializeData) {
+    lightingStore.initializeData();
+  }
 };
 
 /**
  * Check if any store has data (to determine if we should seed)
  */
 export const hasExistingData = () => {
-  const maintenanceEntries = useMaintenanceStore.getState().entries || [];
-  const modifications = useModificationsStore.getState().modifications || [];
-  const diagnosticCodes = useDiagnosticsStore.getState().codes || [];
-  const fuelEntries = useFuelStore.getState().entries || [];
-  const photos = useGalleryStore.getState().photos || [];
-  const audioComponents = useAudioStore.getState().components || [];
-  const crashEntries = useCrashStore.getState().entries || [];
-  const blueprints = useBlueprintStore.getState().blueprints || [];
+  const maintenanceStore = useMaintenanceStore.getState();
+  const modificationsStore = useModificationsStore.getState();
+  const diagnosticsStore = useDiagnosticsStore.getState();
+  const fuelStore = useFuelStore.getState();
+  const galleryStore = useGalleryStore.getState();
+  const audioStore = useAudioStore.getState();
+  const crashStore = useCrashStore.getState();
   const blueprintStore = useBlueprintStore.getState();
+  const lightingStore = useLightingStore.getState();
+
+  const maintenanceEntries = maintenanceStore.entries || [];
+  const modifications = modificationsStore.modifications || [];
+  const diagnosticCodes = diagnosticsStore.codes || [];
+  const fuelEntries = fuelStore.entries || [];
+  const photos = galleryStore.photos || [];
+  const audioComponents = audioStore.components || [];
+  const crashEntries = crashStore.entries || [];
+  const blueprints = blueprintStore.blueprints || [];
   const dimensions = blueprintStore.dimensions || [];
-  const lightingPlans = useLightingStore.getState().plans || [];
+  const lightingPlans = lightingStore.plans || [];
   
   return (
     maintenanceEntries.length > 0 ||

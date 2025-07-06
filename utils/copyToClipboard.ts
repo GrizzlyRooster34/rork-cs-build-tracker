@@ -1,31 +1,24 @@
 import { Platform } from 'react-native';
-import * as Clipboard from 'expo-clipboard';
 
-export const copyToClipboard = async (text: string): Promise<boolean> => {
+// Web-compatible clipboard functions
+const webCopyToClipboard = async (text: string): Promise<boolean> => {
   try {
-    if (Platform.OS === 'web') {
-      // Web clipboard API
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-        return true;
-      } else {
-        // Fallback for older browsers
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        const result = document.execCommand('copy');
-        textArea.remove();
-        return result;
-      }
-    } else {
-      // Native clipboard
-      await Clipboard.setStringAsync(text);
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
       return true;
+    } else {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const result = document.execCommand('copy');
+      textArea.remove();
+      return result;
     }
   } catch (error) {
     console.error('Failed to copy to clipboard:', error);
@@ -33,19 +26,53 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
   }
 };
 
-export const getFromClipboard = async (): Promise<string> => {
+const webGetFromClipboard = async (): Promise<string> => {
   try {
-    if (Platform.OS === 'web') {
-      if (navigator.clipboard && window.isSecureContext) {
-        return await navigator.clipboard.readText();
-      }
-      return '';
-    } else {
-      return await Clipboard.getStringAsync();
+    if (navigator.clipboard && window.isSecureContext) {
+      return await navigator.clipboard.readText();
     }
+    return '';
   } catch (error) {
     console.error('Failed to read from clipboard:', error);
     return '';
+  }
+};
+
+// Native clipboard functions
+const nativeCopyToClipboard = async (text: string): Promise<boolean> => {
+  try {
+    const { setStringAsync } = await import('expo-clipboard');
+    await setStringAsync(text);
+    return true;
+  } catch (error) {
+    console.error('Failed to copy to clipboard:', error);
+    return false;
+  }
+};
+
+const nativeGetFromClipboard = async (): Promise<string> => {
+  try {
+    const { getStringAsync } = await import('expo-clipboard');
+    return await getStringAsync();
+  } catch (error) {
+    console.error('Failed to read from clipboard:', error);
+    return '';
+  }
+};
+
+export const copyToClipboard = async (text: string): Promise<boolean> => {
+  if (Platform.OS === 'web') {
+    return await webCopyToClipboard(text);
+  } else {
+    return await nativeCopyToClipboard(text);
+  }
+};
+
+export const getFromClipboard = async (): Promise<string> => {
+  if (Platform.OS === 'web') {
+    return await webGetFromClipboard();
+  } else {
+    return await nativeGetFromClipboard();
   }
 };
 

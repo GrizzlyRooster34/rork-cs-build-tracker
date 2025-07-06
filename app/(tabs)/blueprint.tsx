@@ -33,6 +33,8 @@ export default function BlueprintScreen() {
   };
 
   const safeDimensions = dimensions || [];
+  const safeBlueprints = blueprints || [];
+  
   const groupedDimensions = safeDimensions.reduce((acc, dimension) => {
     if (!acc[dimension.category]) {
       acc[dimension.category] = [];
@@ -89,47 +91,54 @@ export default function BlueprintScreen() {
         {activeTab === 'dimensions' ? (
           <>
             {/* Dimensions View */}
-            {Object.entries(groupedDimensions).map(([category, categoryDimensions]) => (
-              <View key={category} style={styles.section}>
-                <Text style={styles.sectionTitle}>{getCategoryTitle(category)}</Text>
-                
-                {categoryDimensions.map((dimension) => (
-                  <View key={dimension.id} style={styles.dimensionCard}>
-                    <View style={styles.dimensionHeader}>
-                      <Text style={styles.dimensionName}>{dimension.name}</Text>
-                      <View style={styles.dimensionValue}>
-                        <Text style={styles.dimensionMeasurement}>
-                          {dimension.measurement} {dimension.unit}
+            {Object.entries(groupedDimensions).length > 0 ? (
+              Object.entries(groupedDimensions).map(([category, categoryDimensions]) => (
+                <View key={category} style={styles.section}>
+                  <Text style={styles.sectionTitle}>{getCategoryTitle(category)}</Text>
+                  
+                  {categoryDimensions.map((dimension) => (
+                    <View key={dimension.id} style={styles.dimensionCard}>
+                      <View style={styles.dimensionHeader}>
+                        <Text style={styles.dimensionName}>{dimension.name}</Text>
+                        <View style={styles.dimensionValue}>
+                          <Text style={styles.dimensionMeasurement}>
+                            {dimension.measurement} {dimension.unit}
+                          </Text>
+                          {dimension.verified && (
+                            <CheckCircle size={16} color={theme.colors.success} />
+                          )}
+                        </View>
+                      </View>
+                      
+                      <Text style={styles.dimensionDescription}>{dimension.description}</Text>
+                      
+                      <View style={styles.dimensionMeta}>
+                        <Text style={styles.dimensionReference}>
+                          Reference: {dimension.reference}
                         </Text>
-                        {dimension.verified && (
-                          <CheckCircle size={16} color={theme.colors.success} />
-                        )}
+                      </View>
+                      
+                      {dimension.notes && (
+                        <Text style={styles.dimensionNotes}>{dimension.notes}</Text>
+                      )}
+                      
+                      <View style={styles.dimensionTags}>
+                        {dimension.tags.map((tag, index) => (
+                          <View key={index} style={styles.tag}>
+                            <Text style={styles.tagText}>{tag}</Text>
+                          </View>
+                        ))}
                       </View>
                     </View>
-                    
-                    <Text style={styles.dimensionDescription}>{dimension.description}</Text>
-                    
-                    <View style={styles.dimensionMeta}>
-                      <Text style={styles.dimensionReference}>
-                        Reference: {dimension.reference}
-                      </Text>
-                    </View>
-                    
-                    {dimension.notes && (
-                      <Text style={styles.dimensionNotes}>{dimension.notes}</Text>
-                    )}
-                    
-                    <View style={styles.dimensionTags}>
-                      {dimension.tags.map((tag, index) => (
-                        <View key={index} style={styles.tag}>
-                          <Text style={styles.tagText}>{tag}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  </View>
-                ))}
+                  ))}
+                </View>
+              ))
+            ) : (
+              <View style={styles.emptyState}>
+                <Ruler size={48} color={theme.colors.textSecondary} />
+                <Text style={styles.emptyStateText}>No dimensions recorded yet</Text>
               </View>
-            ))}
+            )}
           </>
         ) : (
           <>
@@ -137,80 +146,87 @@ export default function BlueprintScreen() {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Project Blueprints</Text>
               
-              {blueprints.map((blueprint) => (
-                <View key={blueprint.id} style={styles.blueprintCard}>
-                  <View style={styles.blueprintHeader}>
-                    <View style={styles.blueprintInfo}>
-                      <Text style={styles.blueprintTitle}>{blueprint.title}</Text>
-                      <Text style={styles.blueprintCategory}>{blueprint.category.toUpperCase()}</Text>
+              {safeBlueprints.length > 0 ? (
+                safeBlueprints.map((blueprint) => (
+                  <View key={blueprint.id} style={styles.blueprintCard}>
+                    <View style={styles.blueprintHeader}>
+                      <View style={styles.blueprintInfo}>
+                        <Text style={styles.blueprintTitle}>{blueprint.title}</Text>
+                        <Text style={styles.blueprintCategory}>{blueprint.category.toUpperCase()}</Text>
+                      </View>
+                      <View style={styles.blueprintBadges}>
+                        <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(blueprint.difficulty) + '20' }]}>
+                          <Text style={[styles.difficultyText, { color: getDifficultyColor(blueprint.difficulty) }]}>
+                            {blueprint.difficulty.toUpperCase()}
+                          </Text>
+                        </View>
+                        <View style={styles.statusBadge}>
+                          {getStatusIcon(blueprint.status)}
+                          <Text style={[styles.statusText, { color: getStatusIcon(blueprint.status)?.props.color }]}>
+                            {blueprint.status.replace('-', ' ').toUpperCase()}
+                          </Text>
+                        </View>
+                      </View>
                     </View>
-                    <View style={styles.blueprintBadges}>
-                      <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(blueprint.difficulty) + '20' }]}>
-                        <Text style={[styles.difficultyText, { color: getDifficultyColor(blueprint.difficulty) }]}>
-                          {blueprint.difficulty.toUpperCase()}
+
+                    <Text style={styles.blueprintDescription}>{blueprint.description}</Text>
+
+                    <View style={styles.blueprintMeta}>
+                      <View style={styles.metaRow}>
+                        <Text style={styles.metaLabel}>Time:</Text>
+                        <Text style={styles.metaValue}>{blueprint.estimatedTime}</Text>
+                      </View>
+                      <View style={styles.metaRow}>
+                        <Text style={styles.metaLabel}>Cost:</Text>
+                        <Text style={styles.metaValue}>${blueprint.cost}</Text>
+                      </View>
+                    </View>
+
+                    {/* Steps */}
+                    <View style={styles.stepsSection}>
+                      <Text style={styles.stepsTitle}>Steps:</Text>
+                      {blueprint.steps.map((step, index) => (
+                        <Text key={index} style={styles.stepItem}>
+                          {index + 1}. {step}
                         </Text>
-                      </View>
-                      <View style={styles.statusBadge}>
-                        {getStatusIcon(blueprint.status)}
-                        <Text style={[styles.statusText, { color: getStatusIcon(blueprint.status)?.props.color }]}>
-                          {blueprint.status.replace('-', ' ').toUpperCase()}
-                        </Text>
-                      </View>
+                      ))}
+                    </View>
+
+                    {/* Materials */}
+                    <View style={styles.materialsSection}>
+                      <Text style={styles.materialsTitle}>Materials:</Text>
+                      {blueprint.materials.map((material, index) => (
+                        <Text key={index} style={styles.materialItem}>• {material}</Text>
+                      ))}
+                    </View>
+
+                    {/* Tools */}
+                    <View style={styles.toolsSection}>
+                      <Text style={styles.toolsTitle}>Tools:</Text>
+                      {blueprint.tools.map((tool, index) => (
+                        <Text key={index} style={styles.toolItem}>• {tool}</Text>
+                      ))}
+                    </View>
+
+                    {blueprint.notes && (
+                      <Text style={styles.blueprintNotes}>{blueprint.notes}</Text>
+                    )}
+
+                    <View style={styles.blueprintTags}>
+                      {blueprint.tags.map((tag, index) => (
+                        <View key={index} style={styles.tag}>
+                          <Text style={styles.tagText}>{tag}</Text>
+                        </View>
+                      ))}
                     </View>
                   </View>
-
-                  <Text style={styles.blueprintDescription}>{blueprint.description}</Text>
-
-                  <View style={styles.blueprintMeta}>
-                    <View style={styles.metaRow}>
-                      <Text style={styles.metaLabel}>Time:</Text>
-                      <Text style={styles.metaValue}>{blueprint.estimatedTime}</Text>
-                    </View>
-                    <View style={styles.metaRow}>
-                      <Text style={styles.metaLabel}>Cost:</Text>
-                      <Text style={styles.metaValue}>${blueprint.cost}</Text>
-                    </View>
-                  </View>
-
-                  {/* Steps */}
-                  <View style={styles.stepsSection}>
-                    <Text style={styles.stepsTitle}>Steps:</Text>
-                    {blueprint.steps.map((step, index) => (
-                      <Text key={index} style={styles.stepItem}>
-                        {index + 1}. {step}
-                      </Text>
-                    ))}
-                  </View>
-
-                  {/* Materials */}
-                  <View style={styles.materialsSection}>
-                    <Text style={styles.materialsTitle}>Materials:</Text>
-                    {blueprint.materials.map((material, index) => (
-                      <Text key={index} style={styles.materialItem}>• {material}</Text>
-                    ))}
-                  </View>
-
-                  {/* Tools */}
-                  <View style={styles.toolsSection}>
-                    <Text style={styles.toolsTitle}>Tools:</Text>
-                    {blueprint.tools.map((tool, index) => (
-                      <Text key={index} style={styles.toolItem}>• {tool}</Text>
-                    ))}
-                  </View>
-
-                  {blueprint.notes && (
-                    <Text style={styles.blueprintNotes}>{blueprint.notes}</Text>
-                  )}
-
-                  <View style={styles.blueprintTags}>
-                    {blueprint.tags.map((tag, index) => (
-                      <View key={index} style={styles.tag}>
-                        <Text style={styles.tagText}>{tag}</Text>
-                      </View>
-                    ))}
-                  </View>
+                ))
+              ) : (
+                <View style={styles.emptyState}>
+                  <FileText size={48} color={theme.colors.textSecondary} />
+                  <Text style={styles.emptyStateText}>No blueprints created yet</Text>
                 </View>
-              ))}
+              )}
             </View>
           </>
         )}
@@ -263,6 +279,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: theme.colors.text,
     marginBottom: 12,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: theme.colors.textSecondary,
+    marginTop: 16,
   },
   dimensionCard: {
     backgroundColor: theme.colors.card,
